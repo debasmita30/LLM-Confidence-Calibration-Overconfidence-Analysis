@@ -153,7 +153,7 @@ The plots below show calibration behavior before and after temperature scaling.
 - Points below the diagonal indicate overconfidence.
 - Temperature scaling shifts predictions closer to the ideal calibration line.
 
-![Reliability Diagrams] (reliability_diagrams.png)
+![Reliability Diagrams] reliability_diagrams.png
 
 🔬 Statistical Validation
 
