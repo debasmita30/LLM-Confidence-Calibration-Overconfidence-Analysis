@@ -65,6 +65,7 @@ mistralai/Mistral-7B-Instruct-v0.2 (4-bit quantized)
 microsoft/phi-2
 
 ⚙️ Core Methodology
+
 1️⃣ Logit-Level Confidence Extraction
 
 Extract final-token logits
