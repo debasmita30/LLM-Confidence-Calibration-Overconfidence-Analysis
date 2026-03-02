@@ -1,54 +1,62 @@
 # LLM-Confidence-Calibration-Overconfidence-Analysis
-A rigorous evaluation of calibration, overconfidence, and hallucination behavior in instruction-tuned Large Language Models (LLMs).
-This project quantitatively measures and corrects miscalibration using logit-level analysis and post-hoc temperature scaling.
 
-## 📌 Overview
+![Python](https://img.shields.io/badge/Python-3.10-3776AB?logo=python&logoColor=white)
+![PyTorch](https://img.shields.io/badge/PyTorch-Deep_Learning-EE4C2C?logo=pytorch&logoColor=white)
+![Transformers](https://img.shields.io/badge/HuggingFace-Transformers-FFCC4D?logo=huggingface&logoColor=black)
+![NumPy](https://img.shields.io/badge/NumPy-Numerical_Computing-013243?logo=numpy&logoColor=white)
+![Pandas](https://img.shields.io/badge/Pandas-Data_Processing-150458?logo=pandas&logoColor=white)
+![Matplotlib](https://img.shields.io/badge/Matplotlib-Visualization-11557C?logo=plotly&logoColor=white)
+![Calibration](https://img.shields.io/badge/Model-Calibration-purple)
+![ECE](https://img.shields.io/badge/Expected_Calibration_Error-Metric-green)
+![Bootstrap](https://img.shields.io/badge/Bootstrap-Statistical_Validation-orange)
+![Reliability](https://img.shields.io/badge/Reliability-Diagram-success)
 
-Large Language Models often produce highly confident predictions—even when incorrect.
-This project investigates:
+A production-grade statistical evaluation framework for diagnosing and correcting overconfidence in instruction-tuned Large Language Models (LLMs).
 
-How overconfident modern LLMs are
+This system performs logit-level confidence extraction, probabilistic calibration analysis, hallucination quantification, and post-hoc temperature scaling — ensuring deployment-grade reliability without affecting model accuracy.
 
-Whether self-reported confidence is reliable
+🧠 Problem Statement
 
-How temperature scaling improves calibration
+LLMs frequently produce highly confident predictions—even when incorrect.
 
-How calibration differs across model sizes
+In production environments, this leads to:
 
-The study compares:
+Overconfident hallucinations
 
-Mistral-7B-Instruct
+Misleading decision support
 
-Phi-2
+Risk amplification in enterprise systems
 
-using statistical evaluation metrics rather than prompt-based heuristics.
+Reduced trust in AI outputs
 
-🎯 Objectives
+This project provides a mathematically grounded framework to measure and correct model miscalibration.
 
-Measure probabilistic calibration of LLMs
+🎯 System Capabilities
 
-Quantify overconfident hallucinations
+✔ Logit-level confidence extraction
+✔ Expected Calibration Error (ECE) measurement
+✔ Adaptive binning calibration analysis
+✔ Overconfident hallucination detection
+✔ Post-hoc temperature scaling optimization
+✔ Bootstrap statistical validation
+✔ Cross-model calibration benchmarking
 
-Apply post-hoc temperature scaling
+Designed for reliability analysis in real-world AI deployment settings.
 
-Compare internal softmax confidence vs self-reported confidence
-
-Evaluate calibration differences between large and smaller models
-
-Provide statistically grounded evaluation using bootstrap confidence intervals
-
-## 🧪 Experimental Setup
+🧪 Experimental Framework
 Dataset
 
-BoolQ (Yes/No question answering)
+BoolQ (Yes/No QA)
 
 500–1000 validation samples
 
-Proper calibration/test split:
+Strict split:
 
 50% calibration set
 
-50% evaluation set
+50% held-out evaluation set
+
+No calibration leakage.
 
 Models Evaluated
 
@@ -56,29 +64,24 @@ mistralai/Mistral-7B-Instruct-v0.2 (4-bit quantized)
 
 microsoft/phi-2
 
-Confidence Extraction
+⚙️ Core Methodology
+1️⃣ Logit-Level Confidence Extraction
 
-Logits extracted from final token
+Extract final-token logits
 
-Softmax probabilities computed for "yes" and "no"
+Compute softmax over binary labels
 
 Confidence = max probability
 
-Post-hoc Calibration
+Compare against ground truth
 
-Temperature scaling via grid search
-
-Optimization based on minimizing Negative Log Likelihood (NLL)
-
-Evaluation strictly performed on held-out test set
-
-## 📊 Metrics Used
+2️⃣ Calibration Metrics
 
 Accuracy
 
 Expected Calibration Error (ECE)
 
-Adaptive ECE (equal-frequency binning)
+Adaptive ECE (equal-frequency bins)
 
 Brier Score
 
@@ -86,9 +89,35 @@ Negative Log Likelihood (NLL)
 
 Overconfident Hallucination Rate
 
-Bootstrap Confidence Interval for ECE reduction
+3️⃣ Post-Hoc Temperature Scaling
 
-## 🔍 Key Results
+Optimization objective:
+
+Minimize Negative Log Likelihood (NLL)
+
+Method:
+
+Grid search temperature values
+
+Fit on calibration set
+
+Evaluate on held-out test set
+
+Ensures:
+
+Improved probabilistic alignment
+
+No accuracy distortion
+
+4️⃣ Statistical Validation
+
+1000-iteration bootstrap resampling
+
+95% confidence interval for ECE reduction
+
+Ensures reproducibility and statistical robustness
+
+📊 Quantitative Results
 🔵 Mistral-7B-Instruct
 
 Accuracy: 81.2%
@@ -99,16 +128,15 @@ Calibrated ECE: 0.0603
 
 Optimized Temperature: 6.89
 
+ECE Reduction: ~62%
+
 Overconfident Hallucinations:
 
 Before: 18.4%
 
 After: 13.6%
 
-ECE Reduction: ~62%
-
-Observation:
-Strong overconfidence. Requires large temperature correction.
+Observation: Larger model exhibits extreme logit sharpness and strong overconfidence.
 
 🟢 Phi-2
 
@@ -120,100 +148,77 @@ Calibrated ECE: 0.0322
 
 Optimized Temperature: 1.35
 
-Observation:
-Better default calibration. Requires minimal correction.
+Observation: Smaller model demonstrates stronger inherent calibration.
 
-## 🧠 Major Insights
-1️⃣ Larger Models Can Be Less Calibrated
+📈 Reliability Diagnostics
 
-Mistral-7B is slightly more accurate but significantly more overconfident.
+Reliability diagrams reveal:
 
-2️⃣ Overconfidence Scales With Model Sharpness
+Systematic overconfidence (points below diagonal)
 
-Optimized temperature of ~6.9 indicates extreme logit sharpness.
+Post-scaling alignment toward ideal calibration
 
-3️⃣ Calibration Improves Reliability Without Affecting Accuracy
+Reduced probability distortion
 
-Temperature scaling reduced ECE and overconfident hallucinations while keeping accuracy constant.
+Temperature scaling shifts predictions closer to true empirical likelihood.
 
-4️⃣ Self-Reported Confidence Is Unreliable
+📊 Key Insights Demonstrated
 
-Weak correlation with softmax confidence (ρ ≈ 0.10)
+✔ Larger models can be less calibrated
+✔ Logit sharpness correlates with overconfidence
+✔ Self-reported confidence is unreliable (ρ ≈ 0.10)
+✔ Calibration reduces ECE without affecting accuracy
+✔ Prompt-based confidence is not a valid uncertainty estimator
 
-Worse Brier score than softmax probabilities
-
-Often saturated near 1.0
-
-Conclusion: Prompt-based confidence is not a reliable uncertainty estimator.
-
-## 📈 Reliability Diagrams
-
-The plots below show calibration behavior before and after temperature scaling.
-
-- Points below the diagonal indicate overconfidence.
-- Temperature scaling shifts predictions closer to the ideal calibration line.
-
-![Reliability Diagrams](images/reliability_diagrams.png)
-
-🔬 Statistical Validation
-
-Bootstrap resampling (1000 iterations) was used to compute a 95% confidence interval for ECE reduction, ensuring statistical robustness of calibration improvements.
-
-## 🛠️ Technologies Used
-
-Python
-
-PyTorch
-
-Hugging Face Transformers
-
-BitsAndBytes (4-bit quantization)
-
-NumPy / Pandas
-
-Matplotlib
-
-SciPy
-
-## 📂 Project Structure
+🏗️ Project Structure
 LLM_Calibration_Study.ipynb
 calibration_results.csv
 README.md
+🚀 Production Relevance
 
-🚀 Why This Project Matters
+This system demonstrates:
 
-Most prompt engineering projects focus on prompt wording.
-This project focuses on:
+Deployment-grade uncertainty estimation
 
-Logit-level evaluation
+Statistical model evaluation discipline
 
-Statistical calibration analysis
+Hallucination risk quantification
 
-Cross-model comparison
+Cross-model reliability benchmarking
 
-Quantitative uncertainty assessment
+Probabilistic correction without retraining
 
-Systematic reliability improvement
+Applicable to:
 
-It bridges prompt engineering with model evaluation and applied ML research.
+Enterprise AI systems
 
-## 🧩 Future Improvements
+Conversational AI evaluation
 
-Adaptive binning with dynamic bin count
+RLHF quality diagnostics
 
-Confidence-aware decoding strategies
+Model benchmarking pipelines
 
-Calibration across multiple datasets
+Human-in-the-loop AI validation
 
-Comparison with larger models (e.g., Llama-3)
+🔬 Research Extensions
 
-Selective prediction / abstention mechanisms
+Adaptive dynamic bin calibration
 
-## 📜 License
+Selective prediction / abstention
 
-For educational and research purposes.
+Confidence-aware decoding
 
-👤 Author
+Multi-dataset calibration benchmarking
 
-[Debasmita Chatterjee]
-Focus: LLM Evaluation, Calibration, and Applied AI Systems
+Frontier model comparison
+
+📄 Executive Summary
+
+This project provides a mathematically rigorous calibration framework for instruction-tuned LLMs. By integrating logit-level confidence extraction, statistical reliability diagnostics, and post-hoc temperature scaling, it improves probabilistic correctness without altering model accuracy.
+
+Designed for researchers, AI evaluators, and engineers building trustworthy LLM systems.
+
+👩‍💻 Author
+
+Debasmita Chatterjee
+LLM Evaluation | Calibration | Applied AI Systems
