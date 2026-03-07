@@ -1,12 +1,10 @@
-<div align="center">### LLM Confidence Calibration & Overconfidence Analysis</div> 
+<div align="center"><b>LLM Confidence Calibration & Overconfidence Analysis</b></div> 
 
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:0a0a1a,50:1a1040,100:2d1b69&height=220&section=header&text=LLM%20Confidence%20Calibration&fontSize=38&fontColor=ffffff&fontAlignY=38&desc=Overconfidence%20Analysis%20%26%20Post-Hoc%20Temperature%20Scaling&descAlignY=58&descSize=16&descColor=b794f4" width="100%"/>
 
 <br/>
 
-### 🧪 Tech Stack
 
 
 
