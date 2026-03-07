@@ -1,6 +1,12 @@
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:0a0a1a,50:1a1040,100:2d1b69&height=220&section=header&text=LLM%20Confidence%20Calibration&fontSize=38&fontColor=ffffff&fontAlignY=38&desc=Overconfidence%20Analysis%20%26%20Post-Hoc%20Correction%20Framework&descAlignY=58&descSize=16&descColor=b794f4" width="100%"/>
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:0a0a1a,50:1a1040,100:2d1b69&height=220&section=header&text=LLM%20Confidence%20Calibration&fontSize=38&fontColor=ffffff&fontAlignY=38&desc=Overconfidence%20Analysis%20%26%20Post-Hoc%20Temperature%20Scaling&descAlignY=58&descSize=16&descColor=b794f4" width="100%"/>
+
+<br/>
+
+### 🧪 Tech Stack
+
+`Python` &nbsp;·&nbsp; `PyTorch` &nbsp;·&nbsp; `HuggingFace Transformers` &nbsp;·&nbsp; `NumPy` &nbsp;·&nbsp; `Pandas` &nbsp;·&nbsp; `Matplotlib` &nbsp;·&nbsp; `SciPy` &nbsp;·&nbsp; `scikit-learn`
 
 <br/>
 
@@ -8,21 +14,19 @@
   <img src="https://img.shields.io/badge/Python-3.10-3776AB?style=for-the-badge&logo=python&logoColor=white"/>
   <img src="https://img.shields.io/badge/PyTorch-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white"/>
   <img src="https://img.shields.io/badge/🤗%20Transformers-FFD21E?style=for-the-badge&logoColor=black"/>
-  <img src="https://img.shields.io/badge/NumPy-013243?style=for-the-badge&logo=numpy&logoColor=white"/>
-  <img src="https://img.shields.io/badge/Pandas-150458?style=for-the-badge&logo=pandas&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Google%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=black"/>
 </p>
 
 <p>
-  <img src="https://img.shields.io/badge/Mistral--7B-Evaluated-8b5cf6?style=for-the-badge"/>
-  <img src="https://img.shields.io/badge/Phi--2-Evaluated-06b6d4?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/Mistral--7B--Instruct-4bit%20NF4-8b5cf6?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/Phi--2-float16-06b6d4?style=for-the-badge"/>
   <img src="https://img.shields.io/badge/ECE%20Reduction-~62%25-22c55e?style=for-the-badge"/>
   <img src="https://img.shields.io/badge/Bootstrap-1000%20iterations-f59e0b?style=for-the-badge"/>
 </p>
 
 <br/>
 
-> **A production-grade statistical framework** for diagnosing and correcting overconfidence in instruction-tuned LLMs —
-> via logit-level confidence extraction, ECE measurement, hallucination quantification, and post-hoc temperature scaling.
+> **A production-grade statistical evaluation framework** for diagnosing and correcting overconfidence in instruction-tuned LLMs — via logit-level confidence extraction, ECE measurement, hallucination quantification, and post-hoc temperature scaling.  
 > Designed for deployment-grade reliability without affecting model accuracy.
 
 <br/>
@@ -40,8 +44,8 @@
 - [📁 Project Structure](#-project-structure)
 - [🧪 Experimental Setup](#-experimental-setup)
 - [📊 Quantitative Results](#-quantitative-results)
+- [📈 Reliability Diagrams](#-reliability-diagrams)
 - [💡 Key Insights](#-key-insights)
-- [📈 Reliability Diagnostics](#-reliability-diagnostics)
 - [🔬 Research Extensions](#-research-extensions)
 - [🚀 Getting Started](#-getting-started)
 - [👩‍💻 Author](#-author)
@@ -71,13 +75,15 @@ This framework provides a **mathematically grounded** approach to measure, diagn
 
 | Capability | Description |
 |---|---|
-| 🔢 **Logit-Level Extraction** | Direct confidence extraction from model internals |
-| 📐 **ECE Measurement** | Standard + Adaptive Expected Calibration Error |
-| 🌡️ **Temperature Scaling** | Post-hoc probabilistic correction via grid search |
-| 🧬 **Bootstrap Validation** | 1000-iteration resampling with 95% CI |
-| 🔴 **Hallucination Detection** | Overconfident wrong-answer rate quantification |
-| 📊 **Reliability Diagrams** | Visual calibration alignment analysis |
-| ⚖️ **Cross-Model Benchmarking** | Comparative calibration across model families |
+| 🔢 **Logit-Level Extraction** | Final-token logits extracted over binary Yes/No label tokens |
+| 📐 **Standard ECE** | Equal-width bin calibration error, `n_bins=10` |
+| 📐 **Adaptive ECE** | Equal-frequency bins for robust low-data calibration |
+| 🌡️ **Temperature Scaling** | Grid search over 300 T values ∈ [0.5, 20.0], minimizing NLL |
+| 🔴 **Hallucination Detection** | Overconfident wrong-answer rate at threshold `conf > 0.7` |
+| 🧬 **Bootstrap Validation** | 1000-iteration resampling with 95% CI for ECE reduction |
+| 📊 **Reliability Diagrams** | Visual pre/post calibration alignment plots |
+| 🔬 **Self-Report vs Logit** | Pearson ρ analysis of prompt-elicited vs logit-derived confidence |
+| ⚖️ **Cross-Model Benchmarking** | Mistral-7B-Instruct vs Phi-2 calibration comparison |
 
 ---
 
@@ -85,110 +91,102 @@ This framework provides a **mathematically grounded** approach to measure, diagn
 
 ```mermaid
 flowchart TD
-    A[📥 BoolQ Dataset\n500–1000 samples] --> B[⚡ Data Splitter\n50% Calib / 50% Eval]
+    A[📥 BoolQ Dataset\n500 validation samples] --> B[⚡ Deterministic Split\n250 calibration · 250 test]
 
-    B --> C[🔵 Calibration Set]
-    B --> D[🟢 Held-out Test Set]
+    B --> C[🔵 Calibration Set\n250 samples]
+    B --> D[🟢 Held-out Test Set\n250 samples]
 
-    C --> E[🤖 LLM Inference\nMistral-7B / Phi-2]
-    D --> E
+    C --> E1[🤖 Mistral-7B-Instruct-v0.2\n4-bit NF4 quantization]
+    D --> E1
+    C --> E2[🟢 Microsoft Phi-2\nfloat16]
+    D --> E2
 
-    E --> F[🔢 Logit Extraction\nFinal Token Logits]
-    F --> G[📊 Softmax\nover Binary Labels]
-    G --> H[📈 Confidence Score\nmax probability]
+    E1 --> F[🔢 Final-Token Logit Extraction\nlogits of Yes · No token IDs]
+    E2 --> F
 
-    H --> I{🔄 Calibration\nPipeline}
+    F --> G[📊 Softmax over Binary Labels\nconfidence = max probability]
 
-    I --> J[📐 Metrics Engine]
-    I --> K[🌡️ Temperature\nScaling]
+    G --> I[🌡️ Temperature Optimizer\nGrid 300 steps · NLL objective\nFit on calib · Apply to test]
+    G --> K[📐 Metrics Engine]
+    I --> K
 
-    J --> L[ECE Standard]
-    J --> M[Adaptive ECE]
-    J --> N[Brier Score]
-    J --> O[NLL]
-    J --> P[Hallucination Rate]
+    K --> L[Standard ECE]
+    K --> M[Adaptive ECE]
+    K --> N[Brier Score · NLL]
+    K --> O[🔴 Hallucination Rate\nconf > 0.7 and wrong]
+    K --> P[🔬 Self-Report Correlation\nPearson rho]
 
-    K --> Q[🔍 Grid Search\nTemperature Values]
-    Q --> R[✅ Fit on Calib Set]
-    R --> S[📋 Evaluate on Test Set]
+    L & M & N & O --> Q[🧬 Bootstrap Validator\n1000 iterations · 95% CI]
 
-    S --> T[🧬 Bootstrap Validator\n1000 iterations · 95% CI]
-    L & M & N & O & P --> T
-
-    T --> U[📊 Reliability Diagrams]
-    T --> V[📄 calibration_results.csv]
-    T --> W[🔬 Research Report]
+    Q --> R[📊 Reliability Diagrams]
+    Q --> S[📄 calibration_results.csv]
 
     style A fill:#1e1b4b,stroke:#818cf8,color:#e0e7ff
-    style E fill:#1e3a5f,stroke:#3b82f6,color:#e0f2fe
-    style I fill:#2d1b69,stroke:#8b5cf6,color:#ede9fe
-    style T fill:#1a3a2a,stroke:#22c55e,color:#dcfce7
-    style W fill:#3a1a1a,stroke:#ef4444,color:#fee2e2
+    style E1 fill:#1e3a5f,stroke:#3b82f6,color:#e0f2fe
+    style E2 fill:#1a3a2a,stroke:#22c55e,color:#dcfce7
+    style I fill:#3a1a1a,stroke:#ef4444,color:#fee2e2
+    style Q fill:#2d1b69,stroke:#8b5cf6,color:#ede9fe
+    style S fill:#1a2a3a,stroke:#06b6d4,color:#cffafe
 ```
 
 ---
 
 ## ⚙️ Core Methodology
 
-### Pipeline Overview
+### Pipeline
 
 ```mermaid
 graph LR
-    subgraph STEP1["① Confidence Extraction"]
-        A1[Extract final-token logits]
-        A2[Softmax over Yes/No labels]
-        A3[Confidence = max probability]
-        A1 --> A2 --> A3
+    subgraph S1["① Logit Extraction"]
+        A1["build_prompt()\npassage + question"]
+        A2["Forward pass\ntorch.no_grad"]
+        A3["logits of Yes · No\ntoken IDs"]
+        A4["Softmax → confidence\n= max probability"]
+        A1 --> A2 --> A3 --> A4
     end
 
-    subgraph STEP2["② Calibration Metrics"]
-        B1[ECE Standard]
-        B2[Adaptive ECE]
-        B3[Brier Score + NLL]
-        B4[Hallucination Rate]
+    subgraph S2["② Calibration Metrics"]
+        B1["Standard ECE\n10 equal-width bins"]
+        B2["Adaptive ECE\n10 equal-frequency bins"]
+        B3["Brier Score\nNLL"]
+        B4["Hallucination Rate\nconf > 0.7 and wrong"]
     end
 
-    subgraph STEP3["③ Temperature Scaling"]
-        C1[Grid search T values]
-        C2[Minimize NLL on calib set]
-        C3[Apply optimal T to logits]
+    subgraph S3["③ Temperature Scaling"]
+        C1["Grid T in 0.5 to 20.0\n300 steps"]
+        C2["Minimize NLL\non calibration set"]
+        C3["Apply T* to\ntest set logits"]
         C1 --> C2 --> C3
     end
 
-    subgraph STEP4["④ Statistical Validation"]
-        D1[1000-iteration Bootstrap]
-        D2[95% CI for ECE reduction]
-        D3[Reproducibility check]
-        D1 --> D2 --> D3
+    subgraph S4["④ Validation"]
+        D1["Bootstrap\n1000 iterations"]
+        D2["95% CI\nECE reduction"]
+        D3["Pearson rho\nlogit vs self-report"]
     end
 
-    STEP1 --> STEP2 --> STEP3 --> STEP4
+    S1 --> S2 --> S3 --> S4
 
-    style STEP1 fill:#1e1b4b,stroke:#818cf8,color:#e0e7ff
-    style STEP2 fill:#1e3a2a,stroke:#22c55e,color:#dcfce7
-    style STEP3 fill:#3a1a1a,stroke:#ef4444,color:#fee2e2
-    style STEP4 fill:#1a2a3a,stroke:#06b6d4,color:#cffafe
+    style S1 fill:#1e1b4b,stroke:#818cf8,color:#e0e7ff
+    style S2 fill:#1e3a2a,stroke:#22c55e,color:#dcfce7
+    style S3 fill:#3a1a1a,stroke:#ef4444,color:#fee2e2
+    style S4 fill:#2d1b69,stroke:#8b5cf6,color:#ede9fe
 ```
 
-### Temperature Scaling — How It Works
+### Temperature Scaling Formula
 
 ```
-Raw Logits  →  Divide by T  →  Softmax  →  Calibrated Probabilities
+Raw Logits  →  Divide by T*  →  Softmax  →  Calibrated Probabilities
 
-         z_i                         exp(z_i / T)
-P_i  =  ─────   becomes   P_i(T)  =  ─────────────────
-         softmax                       Σ exp(z_j / T)
+                     exp(z_i / T*)
+    P_i(T*) =   ─────────────────────
+                  Σ exp(z_j / T*)
 
-  T > 1  →  softer distribution  →  reduces overconfidence
-  T < 1  →  sharper distribution →  increases confidence
-  T = 1  →  no change (baseline)
-```
+Optimization:  T* = argmin  − Σ  y_i · log P_i(T)
+                     T>0       i
 
-Optimization objective:
-
-```
-T* = argmin  − Σ  y_i · log P_i(T)
-       T>0       i
+  Mistral-7B  →  T* = 6.89   (extreme logit sharpness → large correction needed)
+  Phi-2       →  T* = 1.35   (near-calibrated → minimal correction needed)
 ```
 
 ---
@@ -198,38 +196,59 @@ T* = argmin  − Σ  y_i · log P_i(T)
 ```
 LLM-Confidence-Calibration/
 │
-├── 📓 LLM_Calibration_Study.ipynb      # End-to-end experimental notebook
+├── 📓 LLM_Calibration_Study.ipynb        # Complete end-to-end experiment
 │
-├── 📂 data/
-│   ├── 📄 boolq_sample.jsonl           # BoolQ validation subset (500–1000 samples)
-│   └── 📄 split_config.json            # Calibration / test split configuration
+│   ├─ Environment Setup
+│   │    └── GPU check · package installs · CUDA verification
+│   │
+│   ├─ Dataset Loading & Splitting
+│   │    └── BoolQ (HuggingFace datasets) · 500 samples · 250/250 split
+│   │
+│   ├─ Mistral-7B-Instruct-v0.2 Setup
+│   │    └── BitsAndBytesConfig · 4-bit NF4 · double quant · float16 compute
+│   │
+│   ├─ Core Functions
+│   │    ├── build_prompt()           — passage + question prompt template
+│   │    ├── get_yes_no_logits()      — final-token logit extraction
+│   │    ├── collect_logits()         — batch inference over dataset split
+│   │    ├── compute_ece()            — standard ECE, n_bins=10
+│   │    └── optimize_temperature()   — grid search, 300 T values, NLL objective
+│   │
+│   ├─ Hallucination Analysis
+│   │    └── Overconfident wrong predictions at threshold > 0.7
+│   │
+│   ├─ Post-Scaling Hallucination Rate
+│   │    └── Before 18.4%  →  After 13.6%
+│   │
+│   ├─ Reliability Diagram Generation
+│   │    └── reliability_data() · matplotlib · saved as PNG
+│   │
+│   ├─ Self-Report Confidence Extraction
+│   │    └── model.generate() with structured output prompt
+│   │
+│   ├─ Pearson Correlation Analysis
+│   │    └── scipy.stats.pearsonr · softmax vs self-reported (rho ≈ 0.10)
+│   │
+│   ├─ ECE Comparison: Softmax vs Self-Report
+│   │    └── Standard ECE + filtered ECE (conf < 0.95)
+│   │
+│   ├─ Adaptive ECE
+│   │    └── adaptive_ece() — equal-frequency binning
+│   │
+│   ├─ NLL Before / After
+│   │    └── torch.nn.CrossEntropyLoss on raw vs scaled logits
+│   │
+│   ├─ Bootstrap Validation
+│   │    └── 1000 iterations · np.percentile [2.5, 50, 97.5]
+│   │
+│   ├─ Phi-2 Evaluation
+│   │    └── float16 · same pipeline · T* = 1.35 · ECE 0.0524 → 0.0322
+│   │
+│   └─ Export
+│        └── calibration_results.csv · reliability_diagrams.png
 │
-├── 📂 extraction/
-│   ├── 📄 logit_extractor.py           # Final-token logit extraction pipeline
-│   ├── 📄 softmax_confidence.py        # Softmax over binary label tokens
-│   └── 📄 label_mapper.py             # Yes/No token ID mapping per model
-│
-├── 📂 calibration/
-│   ├── 📄 ece_standard.py             # Equal-width bin ECE computation
-│   ├── 📄 ece_adaptive.py             # Equal-frequency adaptive ECE
-│   ├── 📄 brier_nll.py               # Brier score + Negative Log Likelihood
-│   └── 📄 hallucination_rate.py      # Overconfident wrong-answer detection
-│
-├── 📂 temperature_scaling/
-│   ├── 📄 grid_search.py             # Temperature grid search optimizer
-│   ├── 📄 nll_minimizer.py           # NLL objective function
-│   └── 📄 apply_scaling.py          # Apply T* to held-out test set
-│
-├── 📂 validation/
-│   ├── 📄 bootstrap.py              # 1000-iteration bootstrap resampler
-│   └── 📄 confidence_intervals.py  # 95% CI computation for ECE reduction
-│
-├── 📂 visualization/
-│   ├── 📄 reliability_diagram.py    # Pre/post calibration reliability plots
-│   ├── 📄 confidence_histogram.py  # Confidence score distributions
-│   └── 📄 ece_comparison.py        # Cross-model calibration bar charts
-│
-├── 📄 calibration_results.csv       # Full quantitative results export
+├── 📊 reliability_diagrams.png            # Before / After reliability plots
+├── 📄 calibration_results.csv            # softmax_conf · scaled_conf · correct · label
 └── 📄 README.md
 ```
 
@@ -237,22 +256,25 @@ LLM-Confidence-Calibration/
 
 ## 🧪 Experimental Setup
 
-### Dataset
-
 | Property | Value |
 |---|---|
 | **Dataset** | BoolQ (Yes/No Question Answering) |
-| **Sample Size** | 500 – 1000 validation samples |
-| **Calibration Split** | 50% (used to fit temperature) |
-| **Evaluation Split** | 50% held-out (zero leakage) |
-| **Task Format** | Binary classification (Yes / No) |
+| **Total Samples** | 500 validation samples |
+| **Calibration Split** | 250 samples — used to fit T* |
+| **Test Split** | 250 samples — held-out, zero leakage |
+| **Task Format** | Binary classification (Yes / No token logits) |
+| **Confidence** | `softmax(logits[[no_id, yes_id]]).max()` |
+| **Hallucination Threshold** | `conf > 0.7` on wrong predictions |
+| **Temperature Grid** | T ∈ [0.5, 20.0], 300 linearly spaced values |
+| **Bootstrap Iterations** | 1000, with replacement |
+| **Runtime Environment** | Google Colab (GPU — A100 recommended) |
 
-### Models Evaluated
+### Models
 
-| Model | Type | Quantization |
-|---|---|---|
-| `mistralai/Mistral-7B-Instruct-v0.2` | Instruction-tuned, 7B params | 4-bit (bitsandbytes) |
-| `microsoft/phi-2` | Instruction-tuned, 2.7B params | Full precision |
+| Model | Parameters | Quantization | Loading |
+|---|---|---|---|
+| `mistralai/Mistral-7B-Instruct-v0.2` | 7B | 4-bit NF4, double quant, float16 compute | `device_map="auto"` |
+| `microsoft/phi-2` | 2.7B | float16 | `device_map="auto"` |
 
 ---
 
@@ -260,44 +282,58 @@ LLM-Confidence-Calibration/
 
 ### 🔵 Mistral-7B-Instruct-v0.2
 
+| Metric | Before Scaling | After Scaling |
+|---|---|---|
+| **Accuracy** | 81.2% | 81.2% ✅ |
+| **Standard ECE** | 0.1588 | 0.0603 |
+| **ECE Reduction** | — | **~62%** |
+| **Optimal T*** | — | **6.89** |
+| **Overconf. Hallucination Rate** | 18.4% | 13.6% |
+
+> ⚠️ T* = 6.89 signals extreme logit sharpness — distributions are heavily peaked before correction.
+
+### 🟢 Microsoft Phi-2
+
+| Metric | Before Scaling | After Scaling |
+|---|---|---|
+| **Accuracy** | 80.0% | 80.0% ✅ |
+| **Standard ECE** | 0.0524 | 0.0322 |
+| **ECE Reduction** | — | **~39%** |
+| **Optimal T*** | — | **1.35** |
+
+> ✅ T* = 1.35 indicates Phi-2 is already near-calibrated — minimal correction required.
+
+### Cross-Model Summary
+
 ```
-┌─────────────────────────────────────────────────────┐
-│  Accuracy              │  81.2%                      │
-│  Raw ECE               │  0.1588   ████████░░░░░░░░  │
-│  Calibrated ECE        │  0.0603   ███░░░░░░░░░░░░░  │
-│  ECE Reduction         │  ~62%  ✅                   │
-│  Optimal Temperature   │  T* = 6.89  (high sharpness)│
-│  Hallucination Rate    │  18.4%  →  13.6%  (before/after) │
-└─────────────────────────────────────────────────────┘
-  Observation: Extreme logit sharpness → strong overconfidence
-               Temperature scaling provides major correction
+╔══════════════════════════════════════════════════════════════════╗
+║             CALIBRATION BENCHMARK — FINAL RESULTS               ║
+╠══════════════════════════════════════════════════════════════════╣
+║                                                                  ║
+║   Model         │  ECE (raw)  │  ECE (cal)  │  T*   │  ΔECE    ║
+║  ───────────────┼─────────────┼─────────────┼───────┼────────  ║
+║   Mistral-7B    │   0.1588    │   0.0603    │  6.89 │  -62%    ║
+║   Phi-2         │   0.0524    │   0.0322    │  1.35 │  -39%    ║
+║                                                                  ║
+║   Self-Report vs Logit Correlation (Mistral-7B): ρ ≈ 0.10      ║
+║   → Prompt-elicited confidence is NOT a reliable estimator      ║
+║                                                                  ║
+╚══════════════════════════════════════════════════════════════════╝
 ```
 
-### 🟢 Phi-2
+---
 
-```
-┌─────────────────────────────────────────────────────┐
-│  Accuracy              │  80.0%                      │
-│  Raw ECE               │  0.0524   ██░░░░░░░░░░░░░░  │
-│  Calibrated ECE        │  0.0322   █░░░░░░░░░░░░░░░  │
-│  ECE Reduction         │  ~39%  ✅                   │
-│  Optimal Temperature   │  T* = 1.35  (near-calibrated)│
-└─────────────────────────────────────────────────────┘
-  Observation: Smaller model shows stronger inherent calibration
-               Minimal temperature correction required
-```
+## 📈 Reliability Diagrams
 
-### Side-by-Side Comparison
+> Reliability diagrams plot **mean confidence vs. empirical accuracy** per bin.  
+> Points on the diagonal = perfect calibration. Points below = overconfidence.
 
-| Metric | Mistral-7B (Raw) | Mistral-7B (Calibrated) | Phi-2 (Raw) | Phi-2 (Calibrated) |
-|---|---|---|---|---|
-| **Accuracy** | 81.2% | 81.2% ✅ | 80.0% | 80.0% ✅ |
-| **ECE** | 0.1588 | 0.0603 | 0.0524 | 0.0322 |
-| **Halluc. Rate** | 18.4% | 13.6% | — | — |
-| **Optimal T*** | — | 6.89 | — | 1.35 |
-| **ECE Reduction** | — | **~62%** | — | **~39%** |
+![Reliability Diagrams — Before and After Temperature Scaling](reliability_diagrams.png)
 
-> ✅ Temperature scaling improves calibration without altering accuracy in both models.
+| Panel | Observation |
+|---|---|
+| **Before Temperature Scaling** | Points scattered well below the diagonal at high confidence — model severely overestimates its correctness |
+| **After Temperature Scaling** | Points pulled back toward the diagonal — T* = 6.89 substantially redistributes probability mass, improving alignment |
 
 ---
 
@@ -308,44 +344,22 @@ LLM-Confidence-Calibration/
 ║                    FINDINGS SUMMARY                            ║
 ╠════════════════════════════════════════════════════════════════╣
 ║                                                                ║
-║  ①  Larger models ≠ better calibrated                         ║
-║     Mistral-7B (7B) is less calibrated than Phi-2 (2.7B)      ║
+║  ①  Larger models are not better calibrated                    ║
+║     Mistral-7B ECE 0.1588  >>  Phi-2 ECE 0.0524               ║
 ║                                                                ║
 ║  ②  Logit sharpness drives overconfidence                      ║
-║     High T* (6.89) indicates extreme distribution peaking      ║
+║     T* = 6.89 reveals extreme distribution peaking             ║
 ║                                                                ║
 ║  ③  Self-reported confidence is unreliable                     ║
-║     Prompt-based confidence correlates weakly (ρ ≈ 0.10)      ║
+║     Pearson rho ≈ 0.10 between softmax and prompt confidence   ║
 ║                                                                ║
 ║  ④  Temperature scaling is accuracy-neutral                    ║
-║     Calibration improves without any accuracy degradation      ║
+║     Accuracy unchanged: 81.2% and 80.0% post-calibration       ║
 ║                                                                ║
-║  ⑤  Prompt-based uncertainty ≠ valid estimator                 ║
-║     Logit-level extraction is the reliable alternative         ║
+║  ⑤  Hallucination risk is reducible without retraining         ║
+║     Overconf. hallucination rate: 18.4% → 13.6% (Mistral-7B)  ║
 ║                                                                ║
 ╚════════════════════════════════════════════════════════════════╝
-```
-
----
-
-## 📈 Reliability Diagnostics
-
-Reliability diagrams plot **mean confidence vs. actual accuracy** per bin.
-
-```
-Ideal Calibration            Overconfident Model          Post-Scaling
-─────────────────            ───────────────────          ────────────
-Accuracy                     Accuracy                     Accuracy
-  1.0 │          ╱             1.0 │    ·····╱              1.0 │        ╱·
-      │        ╱                   │  ·····╱                    │      ╱·
-  0.5 │      ╱                 0.5 │·····╱                  0.5 │    ╱·
-      │    ╱                       │·····                       │  ╱·
-  0.0 └──────────               0.0 └──────────             0.0 └──────────
-       0.0     1.0                   0.0     1.0                  0.0     1.0
-       Confidence                    Confidence                   Confidence
-
-  Points on diagonal           Points below diagonal        Points near diagonal
-  = perfect calibration        = overconfidence             = corrected by T*
 ```
 
 ---
@@ -355,27 +369,30 @@ Accuracy                     Accuracy                     Accuracy
 | Extension | Description | Status |
 |---|---|---|
 | 🔄 **Dynamic Bin Calibration** | Adaptive binning per prediction region | 🔜 Planned |
-| 🤐 **Selective Prediction** | Abstention when confidence < threshold | 🔜 Planned |
-| 🧬 **Confidence-Aware Decoding** | Integrate calibration into generation loop | 🔜 Planned |
-| 📦 **Multi-Dataset Benchmarking** | TriviaQA, NQ, HellaSwag extensions | 🔜 Planned |
+| 🤐 **Selective Prediction** | Abstain when confidence < learned threshold | 🔜 Planned |
+| 🧬 **Confidence-Aware Decoding** | Integrate T* directly into generation loop | 🔜 Planned |
+| 📦 **Multi-Dataset Benchmarking** | TriviaQA, NaturalQuestions, HellaSwag | 🔜 Planned |
 | 🌐 **Frontier Model Comparison** | GPT-4, Claude, Gemini calibration analysis | 🔜 Planned |
 
 ---
 
 ## 🚀 Getting Started
 
-### Prerequisites
+### Requirements
 
 ```bash
-python >= 3.10
-torch >= 2.0
-transformers >= 4.38
-bitsandbytes >= 0.41    # for 4-bit quantization
+torch>=2.0
+transformers>=4.38
 datasets
+bitsandbytes>=0.41
+scikit-learn
+matplotlib
+seaborn
 numpy
 pandas
-matplotlib
+tqdm
 scipy
+accelerate
 ```
 
 ### Installation
@@ -385,51 +402,31 @@ scipy
 git clone https://github.com/your-username/LLM-Confidence-Calibration.git
 cd LLM-Confidence-Calibration
 
-# 2. Create virtual environment
-python -m venv venv
-source venv/bin/activate   # Windows: venv\Scripts\activate
-
-# 3. Install dependencies
+# 2. Install dependencies
 pip install -r requirements.txt
-```
 
-### Run the Notebook
-
-```bash
+# 3. Open notebook
 jupyter notebook LLM_Calibration_Study.ipynb
 ```
 
-> 💡 **GPU recommended** — Mistral-7B requires ~6GB VRAM with 4-bit quantization. Phi-2 runs on ~5GB.
+> 💡 **GPU required.** Mistral-7B uses ~6GB VRAM with 4-bit NF4 quantization. Phi-2 uses ~5GB at float16.  
+> Notebook developed and tested on **Google Colab (A100)**.
 
-### Quick Start — Run Calibration Only
+### Run on Google Colab
 
-```python
-from calibration.ece_standard import compute_ece
-from temperature_scaling.grid_search import find_optimal_temperature
-
-# Compute raw ECE
-ece = compute_ece(confidences, labels, n_bins=10)
-
-# Find optimal temperature on calibration set
-T_star = find_optimal_temperature(logits_calib, labels_calib)
-
-# Apply to test set and re-evaluate
-ece_calibrated = compute_ece(apply_temperature(logits_test, T_star), labels_test)
-```
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/your-username/LLM-Confidence-Calibration/blob/main/LLM_Calibration_Study.ipynb)
 
 ---
 
 ## 🏭 Production Relevance
 
-This framework directly addresses real deployment requirements:
-
 | Use Case | How This Applies |
 |---|---|
 | **Enterprise AI Systems** | Quantified reliability guarantees before production rollout |
-| **Conversational AI** | Reduces misleading confident wrong answers |
+| **Conversational AI** | Reduces misleading high-confidence wrong answers |
 | **RLHF Diagnostics** | Flags reward model overconfidence during training |
-| **Model Benchmarking** | Calibration as a first-class evaluation metric |
-| **Human-in-the-Loop AI** | Uncertainty scores inform when to escalate to humans |
+| **Model Benchmarking** | Calibration as a first-class metric alongside accuracy |
+| **Human-in-the-Loop AI** | Uncertainty scores inform when to escalate to human review |
 
 ---
 
@@ -443,14 +440,7 @@ This framework directly addresses real deployment requirements:
 
 *LLM Evaluation · Calibration Research · Applied AI Systems*
 
-<p>
-  <a href="https://linkedin.com/in/your-profile">
-    <img src="https://img.shields.io/badge/LinkedIn-Connect-0077B5?style=for-the-badge&logo=linkedin&logoColor=white"/>
-  </a>
-  <a href="https://github.com/your-username">
-    <img src="https://img.shields.io/badge/GitHub-Follow-181717?style=for-the-badge&logo=github&logoColor=white"/>
-  </a>
-</p>
+
 
 </div>
 
