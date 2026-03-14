@@ -31,9 +31,12 @@
 
 <br/>
 
+[🧠 Problem Statement](#-problem-statement) &nbsp;|&nbsp; [🏗️ Architecture](#️-system-architecture) &nbsp;|&nbsp; [⚙️ Methodology](#️-core-methodology) &nbsp;|&nbsp; [📁 Project Structure](#-project-structure) &nbsp;|&nbsp; [📊 Results](#-quantitative-results) &nbsp;|&nbsp; [🚀 Getting Started](#-getting-started)
 </div>
 
 ---
+
+
 
 ## 📋 Table of Contents
 
