@@ -31,7 +31,7 @@
 
 <br/>
 
-[🧠 Problem Statement](#-problem-statement) &nbsp;|&nbsp; [🏗️ Architecture](#️-system-architecture) &nbsp;|&nbsp; [⚙️ Methodology](#️-core-methodology) &nbsp;|&nbsp; [📁 Project Structure](#-project-structure) &nbsp;|&nbsp; [📊 Results](#-quantitative-results) &nbsp;|&nbsp; [🚀 Getting Started](#-getting-started)
+ [🧠 Problem Statement](#-problem-statement) &nbsp;|&nbsp; [🏗️ Architecture](#️-system-architecture) &nbsp;|&nbsp; [⚙️ Methodology](#️-core-methodology) &nbsp;|&nbsp; [📁 Project Structure](#-project-structure) &nbsp;|&nbsp; [📊 Results](#-quantitative-results) &nbsp;|&nbsp; [🛠️ Tech Stack](#️-tech-stack) &nbsp;|&nbsp; [🚀 Getting Started](#-getting-started)
 </div>
 
 ---
@@ -254,6 +254,22 @@ LLM-Confidence-Calibration/
 ├── 📄 calibration_results.csv            # softmax_conf · scaled_conf · correct · label
 └── 📄 README.md
 ```
+
+## 🛠️ Tech Stack
+
+| Layer | Technology | Purpose |
+|---|---|---|
+| Language | Python 3.10 | Core implementation |
+| Deep Learning | PyTorch 2.0+ | Model inference + logit extraction |
+| Models | Mistral-7B-Instruct-v0.2, Phi-2 | LLM evaluation targets |
+| Quantization | BitsAndBytes (4-bit NF4) | Memory-efficient model loading |
+| Transformers | HuggingFace Transformers 4.38+ | Model + tokenizer loading |
+| Dataset | HuggingFace Datasets (BoolQ) | Evaluation benchmark |
+| Calibration | Custom ECE + Temperature Scaling | Core calibration engine |
+| Statistics | SciPy, NumPy | Bootstrap validation + Pearson correlation |
+| Data Processing | Pandas | Results export + analysis |
+| Visualization | Matplotlib, Seaborn | Reliability diagrams |
+| Environment | Google Colab (A100 GPU) | Experiment runtime |
 
 ---
 
