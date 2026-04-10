@@ -3,6 +3,8 @@
 # LLM Confidence Calibration & Overconfidence Analysis
 
 ### A Production-Grade Statistical Framework for Measuring, Diagnosing, and Correcting LLM Miscalibration
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Streamlit-ff4b4b?style=for-the-badge&logo=streamlit&logoColor=white)](https://llm-confidence-calibration-overconfidence-analysis-ubbfcsmujjx.streamlit.app/)
+
 
 <p>
   <img src="https://img.shields.io/badge/Python-3.10-3776AB?style=for-the-badge&logo=python&logoColor=white"/>
@@ -17,7 +19,6 @@
   <img src="https://img.shields.io/badge/ECE%20Reduction-~62%25-22c55e?style=for-the-badge"/>
   <img src="https://img.shields.io/badge/Bootstrap-1000%20iterations-f59e0b?style=for-the-badge"/>
 </p>
-
 <br/>
 
 > Instruction-tuned LLMs routinely assign high confidence to incorrect predictions — a failure mode with serious consequences in enterprise AI deployment. This framework provides a **mathematically rigorous, retraining-free** approach to quantify and correct that miscalibration using logit-level analysis, Expected Calibration Error (ECE) measurement, and post-hoc temperature scaling — validated via 1000-iteration bootstrap resampling.
@@ -25,7 +26,7 @@
 <br/>
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/debasmita30/LLM-Confidence-Calibration-Overconfidence-Analysis/blob/main/LLM_Calibration_Study.ipynb)
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-Streamlit-ff4b4b?style=for-the-badge&logo=streamlit&logoColor=white)](https://llm-confidence-calibration-overconfidence-analysis-ubbfcsmujjx.streamlit.app/)
+
 </div>
 
 ---
