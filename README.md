@@ -391,6 +391,7 @@ This framework directly addresses challenges encountered when deploying LLMs in 
 | Data processing | Pandas | Results export and analysis |
 | Visualization | Matplotlib, Seaborn | Reliability diagrams |
 | Runtime | Google Colab (A100 GPU) | Experiment environment |
+| Frontend / Dashboard | :contentReference[oaicite:0]{index=0} | Interactive live demo and visualization |
 
 ---
 
