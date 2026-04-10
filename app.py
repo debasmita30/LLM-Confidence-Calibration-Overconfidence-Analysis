@@ -468,20 +468,22 @@ with col_d2:
     and leaving accuracy unchanged.
     </div>""", unsafe_allow_html=True)
  
-    # Violin comparison
+ 
     fig_v = go.Figure()
-    for vals, name, color in [
-        (conf_raw,    "Raw",    "#f87171"),
-        (conf_scaled, "Scaled", "#34d399"),
-    ]:
-        fig_v.add_trace(go.Violin(
-            y=vals, name=name,
-            box_visible=True, meanline_visible=True,
-            fillcolor=color.replace(")", ",0.2)").replace("#","rgba(").replace("rgba(","rgba(")
-                if color.startswith("rgba") else color+"33",
-            line_color=color, opacity=0.85,
-            hoverinfo="y",
-        ))
+    for vals, name, color, fill in [
+    (conf_raw, "Raw", "#f87171", "rgba(248,113,113,0.25)"),
+    (conf_scaled, "Scaled", "#34d399", "rgba(52,211,153,0.25)")
+]:
+    fig_v.add_trace(go.Violin(
+        y=vals,
+        name=name,
+        box_visible=True,
+        meanline_visible=True,
+        fillcolor=fill,
+        line_color=color,
+        opacity=0.85,
+        hoverinfo="y"
+    ))
     apply_theme(fig_v, height=260, yaxis_title="Confidence",
                 legend=dict(orientation="h", y=-0.3, bgcolor="rgba(0,0,0,0)"))
     st.plotly_chart(fig_v, use_container_width=True)
