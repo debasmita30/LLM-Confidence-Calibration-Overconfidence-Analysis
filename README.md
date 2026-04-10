@@ -25,7 +25,7 @@
 <br/>
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/debasmita30/LLM-Confidence-Calibration-Overconfidence-Analysis/blob/main/LLM_Calibration_Study.ipynb)
-
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Streamlit-ff4b4b?style=for-the-badge&logo=streamlit&logoColor=white)](https://llm-confidence-calibration-overconfidence-analysis-ubbfcsmujjx.streamlit.app/)
 </div>
 
 ---
