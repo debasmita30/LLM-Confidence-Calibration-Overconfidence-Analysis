@@ -474,15 +474,19 @@ with col_d2:
     (conf_raw, "Raw", "#f87171", "rgba(248,113,113,0.25)"),
     (conf_scaled, "Scaled", "#34d399", "rgba(52,211,153,0.25)")
 ]:
+   for vals, name, color, fill in [
+    (conf_raw, "Raw", "#f87171", "rgba(248,113,113,0.25)"),
+    (conf_scaled, "Scaled", "#34d399", "rgba(52,211,153,0.25)")
+]:
     fig_v.add_trace(go.Violin(
-        y=vals,
-        name=name,
-        box_visible=True,
-        meanline_visible=True,
-        fillcolor=fill,
-        line_color=color,
-        opacity=0.85,
-        hoverinfo="y"
+          y=vals,
+          name=name,
+          box_visible=True,
+          meanline_visible=True,
+          fillcolor=fill,
+          line_color=color,
+          opacity=0.85,
+          hoverinfo="y"
     ))
     apply_theme(fig_v, height=260, yaxis_title="Confidence",
                 legend=dict(orientation="h", y=-0.3, bgcolor="rgba(0,0,0,0)"))
