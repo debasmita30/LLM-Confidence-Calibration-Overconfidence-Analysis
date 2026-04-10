@@ -676,12 +676,18 @@ if run_bootstrap:
     st.markdown("<br>", unsafe_allow_html=True)
     fig_bs = go.Figure()
     for ci, name, color in [(ci_r,"Before","#f87171"),(ci_s,"After","#34d399")]:
-        fig_bs.add_trace(go.Box(
-            q1=[ci[0]], median=[ci[1]], q3=[ci[2]],
-            lowerfence=[ci[0]], upperfence=[ci[2]],
-            name=name, marker_color=color, line_color=color,
-            fillcolor=color+"22", boxmean=False,
-        ))
+     fig_bs.add_trace(go.Box(
+        q1=[ci[0]],
+        median=[ci[1]],
+        q3=[ci[2]],
+        lowerfence=[ci[0]],
+        upperfence=[ci[2]],
+        name=name,
+        marker_color=color,
+        line_color=color,
+        fillcolor="rgba(248,113,113,0.15)" if color == "#f87171" else "rgba(52,211,153,0.15)",
+        boxmean=False
+    ))
     apply_theme(fig_bs, height=280, yaxis_title="ECE",
                 legend=dict(orientation="h", bgcolor="rgba(0,0,0,0)"))
     st.plotly_chart(fig_bs, use_container_width=True)
