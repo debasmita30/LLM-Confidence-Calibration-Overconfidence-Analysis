@@ -1,11 +1,8 @@
-<div align="center"><b>LLM Confidence Calibration & Overconfidence Analysis</b></div> 
-
 <div align="center">
 
+# LLM Confidence Calibration & Overconfidence Analysis
 
-<br/>
-
-<br/>
+### A Production-Grade Statistical Framework for Measuring, Diagnosing, and Correcting LLM Miscalibration
 
 <p>
   <img src="https://img.shields.io/badge/Python-3.10-3776AB?style=for-the-badge&logo=python&logoColor=white"/>
@@ -23,103 +20,99 @@
 
 <br/>
 
-> **A production-grade statistical evaluation framework** for diagnosing and correcting overconfidence in instruction-tuned LLMs — via logit-level confidence extraction, ECE measurement, hallucination quantification, and post-hoc temperature scaling.  
-> Designed for deployment-grade reliability without affecting model accuracy.
+> Instruction-tuned LLMs routinely assign high confidence to incorrect predictions — a failure mode with serious consequences in enterprise AI deployment. This framework provides a **mathematically rigorous, retraining-free** approach to quantify and correct that miscalibration using logit-level analysis, Expected Calibration Error (ECE) measurement, and post-hoc temperature scaling — validated via 1000-iteration bootstrap resampling.
 
 <br/>
 
- [🧠 Problem Statement](#-problem-statement) &nbsp;|&nbsp; [🏗️ Architecture](#️-system-architecture) &nbsp;|&nbsp; [⚙️ Methodology](#️-core-methodology) &nbsp;|&nbsp; [📁 Project Structure](#-project-structure) &nbsp;|&nbsp; [📊 Results](#-quantitative-results) &nbsp;|&nbsp; [🛠️ Tech Stack](#️-tech-stack) &nbsp;|&nbsp; [🚀 Getting Started](#-getting-started)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/debasmita30/LLM-Confidence-Calibration-Overconfidence-Analysis/blob/main/LLM_Calibration_Study.ipynb)
+
 </div>
 
 ---
 
+## Table of Contents
 
-
-## 📋 Table of Contents
-
-- [🧠 Problem Statement](#-problem-statement)
-- [🎯 System Capabilities](#-system-capabilities)
-- [🏗️ System Architecture](#-system-architecture)
-- [⚙️ Core Methodology](#-core-methodology)
-- [📁 Project Structure](#-project-structure)
-- [🧪 Experimental Setup](#-experimental-setup)
-- [📊 Quantitative Results](#-quantitative-results)
-- [📈 Reliability Diagrams](#-reliability-diagrams)
-- [💡 Key Insights](#-key-insights)
-- [🔬 Research Extensions](#-research-extensions)
-- [🚀 Getting Started](#-getting-started)
-- [👩‍💻 Author](#-author)
+- [Motivation](#motivation)
+- [System Capabilities](#system-capabilities)
+- [Architecture](#architecture)
+- [Methodology](#methodology)
+- [Project Structure](#project-structure)
+- [Experimental Setup](#experimental-setup)
+- [Results](#results)
+- [Reliability Diagrams](#reliability-diagrams)
+- [Key Findings](#key-findings)
+- [Production Relevance](#production-relevance)
+- [Tech Stack](#tech-stack)
+- [Getting Started](#getting-started)
 
 ---
 
-## 🧠 Problem Statement
+## Motivation
 
-LLMs frequently produce **highly confident predictions — even when incorrect**.
+Accuracy alone is insufficient for deploying LLMs in high-stakes environments. A model that is 81% accurate but assigns 95%+ confidence to its wrong answers is **more dangerous than a model with lower accuracy that knows what it doesn't know**.
 
-In production environments, this creates compounding failure modes:
+This project addresses four compounding failure modes in production LLM systems:
 
-<table>
-<tr>
-<td align="center">🤖<br/><b>Overconfident<br/>Hallucinations</b></td>
-<td align="center">⚠️<br/><b>Misleading<br/>Decision Support</b></td>
-<td align="center">📈<br/><b>Risk Amplification<br/>in Enterprise AI</b></td>
-<td align="center">🔍<br/><b>Reduced Trust<br/>in AI Outputs</b></td>
-</tr>
-</table>
-
-This framework provides a **mathematically grounded** approach to measure, diagnose, and correct model miscalibration — without retraining.
-
----
-
-## 🎯 System Capabilities
-
-| Capability | Description |
+| Failure Mode | Impact |
 |---|---|
-| 🔢 **Logit-Level Extraction** | Final-token logits extracted over binary Yes/No label tokens |
-| 📐 **Standard ECE** | Equal-width bin calibration error, `n_bins=10` |
-| 📐 **Adaptive ECE** | Equal-frequency bins for robust low-data calibration |
-| 🌡️ **Temperature Scaling** | Grid search over 300 T values ∈ [0.5, 20.0], minimizing NLL |
-| 🔴 **Hallucination Detection** | Overconfident wrong-answer rate at threshold `conf > 0.7` |
-| 🧬 **Bootstrap Validation** | 1000-iteration resampling with 95% CI for ECE reduction |
-| 📊 **Reliability Diagrams** | Visual pre/post calibration alignment plots |
-| 🔬 **Self-Report vs Logit** | Pearson ρ analysis of prompt-elicited vs logit-derived confidence |
-| ⚖️ **Cross-Model Benchmarking** | Mistral-7B-Instruct vs Phi-2 calibration comparison |
+| Overconfident hallucinations | Model states incorrect facts with certainty — users trust them |
+| Misleading decision support | Downstream systems receive unreliable confidence signals |
+| Risk amplification in enterprise AI | High-confidence errors propagate through pipelines unchecked |
+| Eroded human-AI trust | No principled basis for knowing when to escalate to human review |
+
+This framework diagnoses all four — and corrects the underlying miscalibration **without retraining**.
 
 ---
 
-## 🏗️ System Architecture
+## System Capabilities
+
+| Capability | Implementation |
+|---|---|
+| **Logit-level confidence extraction** | Final-token logits extracted over binary Yes/No label token IDs |
+| **Standard ECE** | Equal-width binning, `n_bins=10` |
+| **Adaptive ECE** | Equal-frequency binning for robust low-data calibration |
+| **Temperature scaling** | Grid search over 300 T values ∈ [0.5, 20.0], NLL minimization |
+| **Hallucination quantification** | Overconfident wrong-answer rate at threshold `conf > 0.7` |
+| **Bootstrap validation** | 1000-iteration resampling with 95% confidence intervals |
+| **Reliability diagrams** | Pre/post calibration visual alignment plots |
+| **Self-report vs logit analysis** | Pearson ρ between prompt-elicited and logit-derived confidence |
+| **Cross-model benchmarking** | Mistral-7B-Instruct-v0.2 vs Microsoft Phi-2 |
+
+---
+
+## Architecture
 
 ```mermaid
 flowchart TD
-    A[📥 BoolQ Dataset\n500 validation samples] --> B[⚡ Deterministic Split\n250 calibration · 250 test]
+    A[BoolQ Dataset\n500 validation samples] --> B[Deterministic Split\n250 calibration · 250 test]
 
-    B --> C[🔵 Calibration Set\n250 samples]
-    B --> D[🟢 Held-out Test Set\n250 samples]
+    B --> C[Calibration Set\n250 samples]
+    B --> D[Held-out Test Set\n250 samples]
 
-    C --> E1[🤖 Mistral-7B-Instruct-v0.2\n4-bit NF4 quantization]
+    C --> E1[Mistral-7B-Instruct-v0.2\n4-bit NF4 quantization]
     D --> E1
-    C --> E2[🟢 Microsoft Phi-2\nfloat16]
+    C --> E2[Microsoft Phi-2\nfloat16]
     D --> E2
 
-    E1 --> F[🔢 Final-Token Logit Extraction\nlogits of Yes · No token IDs]
+    E1 --> F[Final-Token Logit Extraction\nlogits of Yes · No token IDs]
     E2 --> F
 
-    F --> G[📊 Softmax over Binary Labels\nconfidence = max probability]
+    F --> G[Softmax over Binary Labels\nconfidence = max probability]
 
-    G --> I[🌡️ Temperature Optimizer\nGrid 300 steps · NLL objective\nFit on calib · Apply to test]
-    G --> K[📐 Metrics Engine]
+    G --> I[Temperature Optimizer\nGrid 300 steps · NLL objective\nFit on calib · Apply to test]
+    G --> K[Metrics Engine]
     I --> K
 
     K --> L[Standard ECE]
     K --> M[Adaptive ECE]
     K --> N[Brier Score · NLL]
-    K --> O[🔴 Hallucination Rate\nconf > 0.7 and wrong]
-    K --> P[🔬 Self-Report Correlation\nPearson rho]
+    K --> O[Hallucination Rate\nconf > 0.7 and wrong]
+    K --> P[Self-Report Correlation\nPearson rho]
 
-    L & M & N & O --> Q[🧬 Bootstrap Validator\n1000 iterations · 95% CI]
+    L & M & N & O --> Q[Bootstrap Validator\n1000 iterations · 95% CI]
 
-    Q --> R[📊 Reliability Diagrams]
-    Q --> S[📄 calibration_results.csv]
+    Q --> R[Reliability Diagrams]
+    Q --> S[calibration_results.csv]
 
     style A fill:#1e1b4b,stroke:#818cf8,color:#e0e7ff
     style E1 fill:#1e3a5f,stroke:#3b82f6,color:#e0f2fe
@@ -131,9 +124,9 @@ flowchart TD
 
 ---
 
-## ⚙️ Core Methodology
+## Methodology
 
-### Pipeline
+### Four-Stage Pipeline
 
 ```mermaid
 graph LR
@@ -148,21 +141,21 @@ graph LR
     subgraph S2["② Calibration Metrics"]
         B1["Standard ECE\n10 equal-width bins"]
         B2["Adaptive ECE\n10 equal-frequency bins"]
-        B3["Brier Score\nNLL"]
+        B3["Brier Score · NLL"]
         B4["Hallucination Rate\nconf > 0.7 and wrong"]
     end
 
     subgraph S3["③ Temperature Scaling"]
-        C1["Grid T in 0.5 to 20.0\n300 steps"]
+        C1["Grid T ∈ [0.5, 20.0]\n300 steps"]
         C2["Minimize NLL\non calibration set"]
         C3["Apply T* to\ntest set logits"]
         C1 --> C2 --> C3
     end
 
-    subgraph S4["④ Validation"]
+    subgraph S4["④ Statistical Validation"]
         D1["Bootstrap\n1000 iterations"]
         D2["95% CI\nECE reduction"]
-        D3["Pearson rho\nlogit vs self-report"]
+        D3["Pearson ρ\nlogit vs self-report"]
     end
 
     S1 --> S2 --> S3 --> S4
@@ -173,7 +166,9 @@ graph LR
     style S4 fill:#2d1b69,stroke:#8b5cf6,color:#ede9fe
 ```
 
-### Temperature Scaling Formula
+### Temperature Scaling
+
+Temperature scaling is a post-hoc calibration method that divides raw logits by a scalar T* before applying softmax. Critically, it does not alter model weights or affect accuracy — it only reshapes the confidence distribution.
 
 ```
 Raw Logits  →  Divide by T*  →  Softmax  →  Calibrated Probabilities
@@ -189,14 +184,16 @@ Optimization:  T* = argmin  − Σ  y_i · log P_i(T)
   Phi-2       →  T* = 1.35   (near-calibrated → minimal correction needed)
 ```
 
+T* is fit exclusively on the calibration split and applied to the held-out test set, ensuring zero data leakage.
+
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 LLM-Confidence-Calibration/
 │
-├── 📓 LLM_Calibration_Study.ipynb        # Complete end-to-end experiment
+├── LLM_Calibration_Study.ipynb           # Complete end-to-end experiment
 │
 │   ├─ Environment Setup
 │   │    └── GPU check · package installs · CUDA verification
@@ -215,7 +212,7 @@ LLM-Confidence-Calibration/
 │   │    └── optimize_temperature()   — grid search, 300 T values, NLL objective
 │   │
 │   ├─ Hallucination Analysis
-│   │    └── Overconfident wrong predictions at threshold > 0.7
+│   │    └── Overconfident wrong predictions at threshold conf > 0.7
 │   │
 │   ├─ Post-Scaling Hallucination Rate
 │   │    └── Before 18.4%  →  After 13.6%
@@ -247,83 +244,65 @@ LLM-Confidence-Calibration/
 │   └─ Export
 │        └── calibration_results.csv · reliability_diagrams.png
 │
-├── 📊 reliability_diagrams.png            # Before / After reliability plots
-├── 📄 calibration_results.csv            # softmax_conf · scaled_conf · correct · label
-└── 📄 README.md
+├── reliability_diagrams.png              # Before/after reliability plots
+├── calibration_results.csv              # softmax_conf · scaled_conf · correct · label
+└── README.md
 ```
-
-## 🛠️ Tech Stack
-
-| Layer | Technology | Purpose |
-|---|---|---|
-| Language | Python 3.10 | Core implementation |
-| Deep Learning | PyTorch 2.0+ | Model inference + logit extraction |
-| Models | Mistral-7B-Instruct-v0.2, Phi-2 | LLM evaluation targets |
-| Quantization | BitsAndBytes (4-bit NF4) | Memory-efficient model loading |
-| Transformers | HuggingFace Transformers 4.38+ | Model + tokenizer loading |
-| Dataset | HuggingFace Datasets (BoolQ) | Evaluation benchmark |
-| Calibration | Custom ECE + Temperature Scaling | Core calibration engine |
-| Statistics | SciPy, NumPy | Bootstrap validation + Pearson correlation |
-| Data Processing | Pandas | Results export + analysis |
-| Visualization | Matplotlib, Seaborn | Reliability diagrams |
-| Environment | Google Colab (A100 GPU) | Experiment runtime |
 
 ---
 
-## 🧪 Experimental Setup
+## Experimental Setup
 
 | Property | Value |
 |---|---|
-| **Dataset** | BoolQ (Yes/No Question Answering) |
-| **Total Samples** | 500 validation samples |
-| **Calibration Split** | 250 samples — used to fit T* |
-| **Test Split** | 250 samples — held-out, zero leakage |
-| **Task Format** | Binary classification (Yes / No token logits) |
-| **Confidence** | `softmax(logits[[no_id, yes_id]]).max()` |
-| **Hallucination Threshold** | `conf > 0.7` on wrong predictions |
-| **Temperature Grid** | T ∈ [0.5, 20.0], 300 linearly spaced values |
-| **Bootstrap Iterations** | 1000, with replacement |
-| **Runtime Environment** | Google Colab (GPU — A100 recommended) |
+| **Dataset** | BoolQ — binary Yes/No question answering |
+| **Total samples** | 500 validation samples |
+| **Calibration split** | 250 samples — used exclusively to fit T* |
+| **Test split** | 250 samples — held-out, zero leakage |
+| **Task format** | Binary classification via Yes/No token logits |
+| **Confidence definition** | `softmax(logits[[no_id, yes_id]]).max()` |
+| **Hallucination threshold** | `conf > 0.7` on incorrect predictions |
+| **Temperature grid** | T ∈ [0.5, 20.0], 300 linearly spaced steps |
+| **Bootstrap iterations** | 1000, with replacement |
+| **Runtime** | Google Colab (A100 GPU) |
 
-### Models
+### Models Evaluated
 
-| Model | Parameters | Quantization | Loading |
+| Model | Parameters | Quantization | Memory |
 |---|---|---|---|
-| `mistralai/Mistral-7B-Instruct-v0.2` | 7B | 4-bit NF4, double quant, float16 compute | `device_map="auto"` |
-| `microsoft/phi-2` | 2.7B | float16 | `device_map="auto"` |
+| `mistralai/Mistral-7B-Instruct-v0.2` | 7B | 4-bit NF4, double quant, float16 compute | ~6GB VRAM |
+| `microsoft/phi-2` | 2.7B | float16 | ~5GB VRAM |
 
 ---
 
-## 📊 Quantitative Results
+## Results
 
-### 🔵 Mistral-7B-Instruct-v0.2
+### Mistral-7B-Instruct-v0.2
 
-| Metric | Before Scaling | After Scaling |
-|---|---|---|
-| **Accuracy** | 81.2% | 81.2% ✅ |
-| **Standard ECE** | 0.1588 | 0.0603 |
-| **ECE Reduction** | — | **~62%** |
-| **Optimal T*** | — | **6.89** |
-| **Overconf. Hallucination Rate** | 18.4% | 13.6% |
+| Metric | Before Scaling | After Scaling | Change |
+|---|---|---|---|
+| **Accuracy** | 81.2% | 81.2% | No change ✅ |
+| **Standard ECE** | 0.1588 | 0.0603 | −62% |
+| **Optimal T\*** | — | 6.89 | — |
+| **Hallucination Rate** | 18.4% | 13.6% | −4.8pp |
 
-> ⚠️ T* = 6.89 signals extreme logit sharpness — distributions are heavily peaked before correction.
+> T* = 6.89 indicates extreme logit sharpness — the model's probability distributions were heavily peaked at high confidence before correction.
 
-### 🟢 Microsoft Phi-2
+### Microsoft Phi-2
 
-| Metric | Before Scaling | After Scaling |
-|---|---|---|
-| **Accuracy** | 80.0% | 80.0% ✅ |
-| **Standard ECE** | 0.0524 | 0.0322 |
-| **ECE Reduction** | — | **~39%** |
-| **Optimal T*** | — | **1.35** |
+| Metric | Before Scaling | After Scaling | Change |
+|---|---|---|---|
+| **Accuracy** | 80.0% | 80.0% | No change ✅ |
+| **Standard ECE** | 0.0524 | 0.0322 | −39% |
+| **Optimal T\*** | — | 1.35 | — |
 
-> ✅ T* = 1.35 indicates Phi-2 is already near-calibrated — minimal correction required.
+> T* = 1.35 indicates Phi-2 is nearly calibrated out of the box — a notable result given it is a significantly smaller model.
 
-### Cross-Model Summary
+### Cross-Model Calibration Summary
 
 ```
 ╔══════════════════════════════════════════════════════════════════╗
-║             CALIBRATION BENCHMARK — FINAL RESULTS               ║
+║              CALIBRATION BENCHMARK — FINAL RESULTS              ║
 ╠══════════════════════════════════════════════════════════════════╣
 ║                                                                  ║
 ║   Model         │  ECE (raw)  │  ECE (cal)  │  T*   │  ΔECE    ║
@@ -339,64 +318,86 @@ LLM-Confidence-Calibration/
 
 ---
 
-## 📈 Reliability Diagrams
+## Reliability Diagrams
 
-> Reliability diagrams plot **mean confidence vs. empirical accuracy** per bin.  
-> Points on the diagonal = perfect calibration. Points below = overconfidence.
+Reliability diagrams plot mean predicted confidence against empirical accuracy per bin. A perfectly calibrated model would lie on the diagonal. Points below the diagonal indicate overconfidence — the model's stated certainty exceeds its actual accuracy.
 
 ![Reliability Diagrams — Before and After Temperature Scaling](reliability_diagrams.png)
 
 | Panel | Observation |
 |---|---|
-| **Before Temperature Scaling** | Points scattered well below the diagonal at high confidence — model severely overestimates its correctness |
-| **After Temperature Scaling** | Points pulled back toward the diagonal — T* = 6.89 substantially redistributes probability mass, improving alignment |
+| **Before temperature scaling** | Points scatter significantly below the diagonal at high confidence — the model severely overestimates its correctness |
+| **After temperature scaling** | Points align toward the diagonal — T* = 6.89 substantially redistributes probability mass and improves calibration alignment |
 
 ---
 
-## 💡 Key Insights
+## Key Findings
 
 ```
 ╔════════════════════════════════════════════════════════════════╗
-║                    FINDINGS SUMMARY                            ║
+║                     FINDINGS SUMMARY                           ║
 ╠════════════════════════════════════════════════════════════════╣
 ║                                                                ║
-║  ①  Larger models are not better calibrated                    ║
+║  ①  Model size does not predict calibration quality            ║
 ║     Mistral-7B ECE 0.1588  >>  Phi-2 ECE 0.0524               ║
+║     Smaller model is better calibrated by a wide margin        ║
 ║                                                                ║
-║  ②  Logit sharpness drives overconfidence                      ║
-║     T* = 6.89 reveals extreme distribution peaking             ║
+║  ②  Logit sharpness is the primary driver of overconfidence    ║
+║     T* = 6.89 reveals extreme distribution peaking in Mistral  ║
 ║                                                                ║
-║  ③  Self-reported confidence is unreliable                     ║
-║     Pearson rho ≈ 0.10 between softmax and prompt confidence   ║
+║  ③  Prompt-elicited confidence is not a reliable signal        ║
+║     Pearson ρ ≈ 0.10 between softmax and self-reported conf    ║
+║     → Do not use model self-reports as uncertainty estimates   ║
 ║                                                                ║
 ║  ④  Temperature scaling is accuracy-neutral                    ║
-║     Accuracy unchanged: 81.2% and 80.0% post-calibration       ║
+║     Accuracy unchanged at 81.2% and 80.0% post-calibration     ║
 ║                                                                ║
 ║  ⑤  Hallucination risk is reducible without retraining         ║
-║     Overconf. hallucination rate: 18.4% → 13.6% (Mistral-7B)  ║
+║     Overconfident hallucination rate: 18.4% → 13.6%            ║
 ║                                                                ║
 ╚════════════════════════════════════════════════════════════════╝
 ```
 
 ---
 
-## 🔬 Research Extensions
+## Production Relevance
 
-| Extension | Description | Status |
-|---|---|---|
-| 🔄 **Dynamic Bin Calibration** | Adaptive binning per prediction region | 🔜 Planned |
-| 🤐 **Selective Prediction** | Abstain when confidence < learned threshold | 🔜 Planned |
-| 🧬 **Confidence-Aware Decoding** | Integrate T* directly into generation loop | 🔜 Planned |
-| 📦 **Multi-Dataset Benchmarking** | TriviaQA, NaturalQuestions, HellaSwag | 🔜 Planned |
-| 🌐 **Frontier Model Comparison** | GPT-4, Claude, Gemini calibration analysis | 🔜 Planned |
+This framework directly addresses challenges encountered when deploying LLMs in enterprise environments:
+
+| Use Case | Application |
+|---|---|
+| **Enterprise AI deployment** | Provides quantified reliability guarantees before production rollout |
+| **Conversational AI** | Reduces the rate of misleading high-confidence wrong answers surfaced to users |
+| **RLHF diagnostics** | Flags reward model overconfidence during training pipelines |
+| **Model selection & benchmarking** | Establishes calibration as a first-class evaluation metric alongside accuracy |
+| **Human-in-the-loop systems** | Calibrated confidence scores provide principled thresholds for escalation to human review |
+| **Financial & regulated domains** | Uncertainty quantification is a compliance requirement in risk-sensitive AI applications |
 
 ---
 
-## 🚀 Getting Started
+## Tech Stack
+
+| Layer | Technology | Role |
+|---|---|---|
+| Language | Python 3.10 | Core implementation |
+| Deep learning | PyTorch 2.0+ | Model inference and logit extraction |
+| Models | Mistral-7B-Instruct-v0.2, Phi-2 | LLM evaluation targets |
+| Quantization | BitsAndBytes (4-bit NF4) | Memory-efficient model loading |
+| Transformers | HuggingFace Transformers 4.38+ | Model and tokenizer loading |
+| Dataset | HuggingFace Datasets (BoolQ) | Evaluation benchmark |
+| Calibration | Custom ECE + temperature scaling | Core calibration engine |
+| Statistics | SciPy, NumPy | Bootstrap validation and Pearson correlation |
+| Data processing | Pandas | Results export and analysis |
+| Visualization | Matplotlib, Seaborn | Reliability diagrams |
+| Runtime | Google Colab (A100 GPU) | Experiment environment |
+
+---
+
+## Getting Started
 
 ### Requirements
 
-```bash
+```
 torch>=2.0
 transformers>=4.38
 datasets
@@ -414,61 +415,50 @@ accelerate
 ### Installation
 
 ```bash
-# 1. Clone the repository
-git clone https://github.com/debasmita30/LLM-Confidence-Calibration.git
-cd LLM-Confidence-Calibration
-
-# 2. Install dependencies
+git clone https://github.com/debasmita30/LLM-Confidence-Calibration-Overconfidence-Analysis.git
+cd LLM-Confidence-Calibration-Overconfidence-Analysis
 pip install -r requirements.txt
-
-# 3. Open notebook
 jupyter notebook LLM_Calibration_Study.ipynb
 ```
 
-> 💡 **GPU required.** Mistral-7B uses ~6GB VRAM with 4-bit NF4 quantization. Phi-2 uses ~5GB at float16.  
-> Notebook developed and tested on **Google Colab (A100)**.
+> GPU required. Mistral-7B uses approximately 6GB VRAM with 4-bit NF4 quantization. Phi-2 uses approximately 5GB at float16. The notebook was developed and tested on Google Colab with an A100 GPU.
 
 ### Run on Google Colab
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/your-username/LLM-Confidence-Calibration/blob/main/LLM_Calibration_Study.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/debasmita30/LLM-Confidence-Calibration-Overconfidence-Analysis/blob/main/LLM_Calibration_Study.ipynb)
 
 ---
 
-## 🏭 Production Relevance
+## Research Extensions
 
-| Use Case | How This Applies |
+| Extension | Description |
 |---|---|
-| **Enterprise AI Systems** | Quantified reliability guarantees before production rollout |
-| **Conversational AI** | Reduces misleading high-confidence wrong answers |
-| **RLHF Diagnostics** | Flags reward model overconfidence during training |
-| **Model Benchmarking** | Calibration as a first-class metric alongside accuracy |
-| **Human-in-the-Loop AI** | Uncertainty scores inform when to escalate to human review |
+| Dynamic bin calibration | Adaptive binning per prediction region for non-uniform confidence distributions |
+| Selective prediction | Abstain mechanism when confidence falls below a learned threshold |
+| Confidence-aware decoding | Integrate T* directly into the generation loop at inference time |
+| Multi-dataset benchmarking | Extend evaluation to TriviaQA, NaturalQuestions, HellaSwag |
+| Frontier model comparison | Calibration analysis for GPT-4, Claude, and Gemini via API |
 
 ---
 
-## 👩‍💻 Author
+## Author
 
 <div align="center">
 
-<img src="https://github.com/identicons/debasmita.png" width="80" style="border-radius:50%"/>
+**Debasmita Chatterjee**
 
-### Debasmita Chatterjee
+LLM Evaluation · Calibration Research · Applied AI Systems
 
-*LLM Evaluation · Calibration Research · Applied AI Systems*
-
-
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0077B5?style=flat-square&logo=linkedin)](https://www.linkedin.com/in/debasmita-chatterjee/)
+[![GitHub](https://img.shields.io/badge/GitHub-Follow-181717?style=flat-square&logo=github)](https://github.com/debasmita30)
+[![Portfolio](https://img.shields.io/badge/Portfolio-Visit-FF6B6B?style=flat-square)](https://leafy-cajeta-9270ea.netlify.app/)
 
 </div>
 
 ---
 
 <div align="center">
-
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:2d1b69,50:1a1040,100:0a0a1a&height=120&section=footer" width="100%"/>
-
-<p><sub>
-  Built to demonstrate that reliable AI requires more than accuracy —<br/>
-  it requires <strong>calibrated, honest uncertainty</strong>.
-</sub></p>
-
+<sub>
+Reliable AI requires more than accuracy — it requires calibrated, honest uncertainty.
+</sub>
 </div>
