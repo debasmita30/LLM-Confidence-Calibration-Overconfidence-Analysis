@@ -415,7 +415,7 @@ accelerate
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/your-username/LLM-Confidence-Calibration.git
+git clone https://github.com/debasmita30/LLM-Confidence-Calibration.git
 cd LLM-Confidence-Calibration
 
 # 2. Install dependencies
