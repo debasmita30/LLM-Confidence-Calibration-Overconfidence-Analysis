@@ -638,7 +638,8 @@ with col_h2:
         title=dict(text=f"Halluc. Rate After Scaling<br>(threshold {halluc_thresh:.2f})",
                    font=dict(color="#94a3b8", size=12)),
     ))
-    apply_theme(fig_g, height=260, margin=dict(l=30, r=30, t=30, b=20))
+    apply_theme(fig_g, height=260)
+    fig_g.update_layout(margin=dict(l=30, r=30, t=30, b=20))
     st.plotly_chart(fig_g, use_container_width=True)
  
 st.markdown("---")
